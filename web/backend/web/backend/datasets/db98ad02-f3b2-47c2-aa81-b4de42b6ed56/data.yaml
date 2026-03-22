@@ -1,0 +1,6 @@
+names:
+  0: nest
+path: /Users/starryn/project/annotation/web/backend/web/backend/datasets/db98ad02-f3b2-47c2-aa81-b4de42b6ed56
+test: images/test
+train: images/train
+val: images/val
