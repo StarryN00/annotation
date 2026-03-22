@@ -44,14 +44,69 @@ function Images() {
     const files = Array.from(e.target.files)
     if (files.length === 0) return
 
+    // 验证文件类型和大小
+    const maxFileSize = 20 * 1024 * 1024 // 20MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    const invalidFiles = files.filter(file => {
+      if (file.size > maxFileSize) return true
+      if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) return true
+      return false
+    })
+
+    if (invalidFiles.length > 0) {
+      alert(`有 ${invalidFiles.length} 个文件不符合要求（超过20MB或格式不支持），请检查后再上传`)
+      return
+    }
+
+    // 分批上传，每批50张
+    const batchSize = 50
+    const totalBatches = Math.ceil(files.length / batchSize)
+    
+    if (files.length > batchSize) {
+      if (!confirm(`您选择了 ${files.length} 张图片，将分 ${totalBatches} 批上传，是否继续？`)) {
+        return
+      }
+    }
+
     setUploading(true)
+    let successCount = 0
+    let errorCount = 0
+    const errors = []
+
     try {
-      await imageApi.upload(files)
+      for (let i = 0; i < files.length; i += batchSize) {
+        const batch = files.slice(i, i + batchSize)
+        const batchNum = Math.floor(i / batchSize) + 1
+        
+        try {
+          const response = await imageApi.upload(batch)
+          successCount += response.data.count
+        } catch (error) {
+          errorCount += batch.length
+          errors.push(`第${batchNum}批: ${error.response?.data?.detail || error.message}`)
+        }
+        
+        // 更新上传进度
+        if (totalBatches > 1) {
+          console.log(`上传进度: ${batchNum}/${totalBatches}`)
+        }
+      }
+
+      // 显示上传结果
+      let message = `上传完成！成功 ${successCount} 张`
+      if (errorCount > 0) {
+        message += `，失败 ${errorCount} 张`
+        console.error('上传错误详情:', errors)
+      }
+      alert(message)
+      
       loadImages()
     } catch (error) {
-      alert('上传失败: ' + error.message)
+      alert('上传失败: ' + (error.response?.data?.detail || error.message))
     } finally {
       setUploading(false)
+      // 清空文件选择，允许重复选择同一文件
+      e.target.value = ''
     }
   }
 
@@ -223,12 +278,12 @@ function Images() {
       <div className="card bg-amber-50 border-amber-200">
         <h3 className="font-semibold text-amber-900 mb-3">批量导入目录图片</h3>
         <p className="text-sm text-amber-700 mb-4">
-          直接扫描指定目录中的所有图片，适合大批量导入（支持最多2000张）
+          扫描服务器本地目录导入图片（支持最多2000张）
         </p>
         <div className="flex items-center gap-3">
           <input
             type="text"
-            placeholder="例如: /Volumes/新加卷/昆虫/樟巢螟"
+            placeholder="服务器路径，例如: /home/ubuntu/images"
             value={directoryPath}
             onChange={(e) => setDirectoryPath(e.target.value)}
             className="input flex-1"
@@ -242,6 +297,9 @@ function Images() {
           </button>
         </div>
         <p className="text-xs text-amber-600 mt-2">
+          ⚠️ 重要：必须是服务器上的绝对路径（如 /home/ubuntu/xxx），不是您本地电脑路径
+        </p>
+        <p className="text-xs text-amber-600">
           提示：图片会被复制到系统目录，原文件不会被删除
         </p>
       </div>
