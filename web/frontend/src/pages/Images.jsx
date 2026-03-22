@@ -58,8 +58,8 @@ function Images() {
       return
     }
 
-    // 分批上传，每批50张
-    const batchSize = 50
+    // 分批上传，每批10张（避免单批过大）
+    const batchSize = 10
     const totalBatches = Math.ceil(files.length / batchSize)
     
     if (files.length > batchSize) {
