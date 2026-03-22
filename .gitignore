@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# 数据和输出
+data/
+outputs/
+runs/
+web/backend/uploads/
+web/backend/data/
+web/backend/datasets/
+
+# 日志
+*.log
+training.log
+server.log
+
+# 环境变量
+.env
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+web/frontend/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 缓存
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# 模型权重文件 (太大)
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# 其他
+__MACOSX/
