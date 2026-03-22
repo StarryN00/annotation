@@ -49,8 +49,8 @@ async def export_model(
         from src.training.export import export_model
 
         export_paths = export_model(model.path, formats=["onnx"])
-        if export_paths:
-            export_path = export_paths[0]
+        if export_paths and "onnx" in export_paths:
+            export_path = export_paths["onnx"]
             size_mb = os.path.getsize(export_path) / (1024 * 1024)
             return ExportModelResponse(
                 download_url=f"/api/models/{model_id}/download?format=onnx",
