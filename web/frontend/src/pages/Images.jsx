@@ -44,26 +44,44 @@ function Images() {
     const files = Array.from(e.target.files)
     if (files.length === 0) return
 
-    // 验证文件类型和大小
-    const maxFileSize = 20 * 1024 * 1024 // 20MB
+    const maxFileSize = 20 * 1024 * 1024
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    const invalidFiles = files.filter(file => {
-      if (file.size > maxFileSize) return true
-      if (!allowedTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) return true
-      return false
+    const allowedExts = /\.(jpg|jpeg|png|webp)$/i
+
+    const validFiles = []
+    const skippedFiles = []
+
+    files.forEach(file => {
+      const isValidType = allowedTypes.includes(file.type) || allowedExts.test(file.name)
+      const isValidSize = file.size <= maxFileSize
+
+      if (isValidType && isValidSize) {
+        validFiles.push(file)
+      } else {
+        const reason = !isValidType ? '格式不支持' : '超过20MB'
+        skippedFiles.push(`${file.name} (${reason})`)
+      }
     })
 
-    if (invalidFiles.length > 0) {
-      alert(`有 ${invalidFiles.length} 个文件不符合要求（超过20MB或格式不支持），请检查后再上传`)
+    if (validFiles.length === 0) {
+      alert(`没有符合要求的文件可上传。\n\n跳过了 ${skippedFiles.length} 个文件:\n${skippedFiles.slice(0, 5).join('\n')}${skippedFiles.length > 5 ? '\n...' : ''}`)
+      e.target.value = ''
       return
     }
 
-    // 分批上传，每批10张（避免单批过大）
+    if (skippedFiles.length > 0) {
+      const skipMsg = skippedFiles.length <= 3
+        ? skippedFiles.join('\n')
+        : skippedFiles.slice(0, 3).join('\n') + `\n...等共${skippedFiles.length}个文件`
+      alert(`将上传 ${validFiles.length} 个文件，跳过 ${skippedFiles.length} 个不符合要求的文件:\n${skipMsg}`)
+    }
+
     const batchSize = 10
-    const totalBatches = Math.ceil(files.length / batchSize)
-    
-    if (files.length > batchSize) {
-      if (!confirm(`您选择了 ${files.length} 张图片，将分 ${totalBatches} 批上传，是否继续？`)) {
+    const totalBatches = Math.ceil(validFiles.length / batchSize)
+
+    if (validFiles.length > batchSize) {
+      if (!confirm(`将上传 ${validFiles.length} 张图片，分 ${totalBatches} 批上传，是否继续？`)) {
+        e.target.value = ''
         return
       }
     }
@@ -74,8 +92,8 @@ function Images() {
     const errors = []
 
     try {
-      for (let i = 0; i < files.length; i += batchSize) {
-        const batch = files.slice(i, i + batchSize)
+      for (let i = 0; i < validFiles.length; i += batchSize) {
+        const batch = validFiles.slice(i, i + batchSize)
         const batchNum = Math.floor(i / batchSize) + 1
         
         try {
