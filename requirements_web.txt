@@ -1,0 +1,19 @@
+# Web界面依赖
+
+# FastAPI核心
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+python-jose[cryptography]>=3.3.0
+
+# 数据库
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+greenlet>=3.0.0
+
+# 异步支持
+asyncio-mqtt>=0.16.0
+websockets>=12.0
+
+# 前端静态文件
+aiofiles>=23.2.0

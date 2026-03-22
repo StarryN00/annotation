@@ -1,0 +1,28 @@
+请分析这张无人机航拍图像，识别图中香樟树的分布情况。
+
+## 香樟树的识别特征：
+1. 树冠形态：椭圆形或卵形，树冠较浓密
+2. 叶片颜色：深绿色，有光泽
+3. 树皮特征：灰褐色，有纵裂纹（高处可能不明显）
+4. 整体高度：通常明显高于周围灌木和草本植被
+
+## 输出要求：
+返回JSON格式：
+{
+  "has_camphor_tree": true,
+  "tree_count": 5,
+  "tree_locations": [
+    {"x": 0.3, "y": 0.4, "estimated_height": "medium"}
+  ],
+  "confidence": "high",
+  "summary": "图像中包含约5棵香樟树，分布在..."
+}
+
+如果没有香樟树：
+{
+  "has_camphor_tree": false,
+  "tree_count": 0,
+  "tree_locations": [],
+  "confidence": "high",
+  "summary": "图像中未检测到香樟树"
+}

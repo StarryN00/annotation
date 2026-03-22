@@ -1,0 +1,91 @@
+# ============================================================
+# 全局配置 - 樟巢螟数据标注与模型训练系统
+# ============================================================
+
+# ---------- 大模型配置（标注用） ----------
+llm:
+  # 当前使用的模型适配器: claude / kimi / openai / gemini
+  provider: "kimi"
+
+  claude:
+    model: "claude-sonnet-4-20250514"
+    api_key_env: "ANTHROPIC_API_KEY"      # 从环境变量读取
+    max_tokens: 1024
+    # Batch API模式（更便宜，24小时内完成）
+    use_batch: false
+
+  kimi:
+    model: "moonshot-v1-8k-vision-preview"
+    api_key_env: "KIMI_API_KEY"
+    base_url: "https://api.moonshot.cn/v1"
+    max_tokens: 1024
+
+  openai:
+    model: "gpt-4o"
+    api_key_env: "OPENAI_API_KEY"
+    max_tokens: 1024
+
+  gemini:
+    model: "gemini-2.5-pro"
+    api_key_env: "GOOGLE_API_KEY"
+    max_tokens: 1024
+
+# ---------- 标注配置 ----------
+labeling:
+  # 提示词模板文件路径
+  prompt_template: "config/prompts/nest_detection.txt"
+  # 最低置信度过滤: high / medium / low
+  min_confidence: "low"
+  # API调用间隔（秒），避免限速
+  request_interval: 0.5
+  # 最大重试次数
+  max_retries: 3
+  # 支持的图片格式
+  supported_formats: [".jpg", ".jpeg", ".png", ".webp"]
+
+# ---------- 类别配置 ----------
+classes:
+  - name: "nest"
+    id: 0
+    description: "樟巢螟虫巢"
+
+# ---------- 数据集配置 ----------
+dataset:
+  # 划分比例
+  train_ratio: 0.7
+  val_ratio: 0.2
+  test_ratio: 0.1
+  # 随机种子（保证可复现）
+  seed: 42
+
+# ---------- 训练配置 ----------
+training:
+  yolo:
+    model_size: "yolov8m"        # n / s / m / l / x
+    pretrained: "yolov8m.pt"
+    epochs: 200
+    batch_size: 8
+    img_size: 640
+    optimizer: "SGD"
+    lr0: 0.02
+    lrf: 0.01                   # 最终学习率 = lr0 * lrf
+    augment: true
+    device: "mps"
+  
+  segmentation:
+    model: "deeplabv3_resnet101"
+    pretrained: true
+    epochs: 100
+    batch_size: 16
+    img_size: 512
+    lr: 0.001
+    optimizer: "AdamW"
+
+# ---------- 路径配置 ----------
+paths:
+  raw_images: "data/raw_images"
+  labels: "data/labels"
+  quality_reports: "data/quality_reports"
+  dataset: "data/dataset"
+  models: "outputs/models"
+  reports: "outputs/reports"
